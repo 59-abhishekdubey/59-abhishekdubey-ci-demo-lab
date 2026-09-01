@@ -1,0 +1,2139 @@
+Absolutely. We’ll do this **exactly like the Docker experiment**: assume you know nothing, and I’ll take you from zero to the final result.
+
+This experiment has **two separate parts**:
+
+```text
+PART A
+GitHub Repository
+       ↓
+GitHub Actions
+       ↓
+Automatic CI workflow
+       ↓
+Success ✅
+
+
+PART B
+GitHub Repository
+       ↓
+Jenkins
+       ↓
+Freestyle CI Job
+       ↓
+Pipeline Project
+       ↓
+Success ✅
+```
+
+**Important:** Don't try to do everything at once. We'll proceed step by step. After each major step, you can check the result before moving on.
+
+---
+
+# PART A — GitHub Actions CI Pipeline
+
+## What are we actually trying to achieve?
+
+Imagine you have a website:
+
+```text
+index.html
+```
+
+Every time you change the code and push it to GitHub, you want GitHub to automatically perform some tasks.
+
+Instead of you manually saying:
+
+> "Check my code."
+
+GitHub Actions automatically says:
+
+> "A new change was pushed. I'll run the CI workflow."
+
+Our workflow will:
+
+```text
+Developer pushes code
+        ↓
+GitHub detects push
+        ↓
+GitHub Actions starts
+        ↓
+Checkout code
+        ↓
+Display "Build Started"
+        ↓
+List project files
+        ↓
+Display "Build Completed Successfully"
+        ↓
+SUCCESS ✅
+```
+
+This is the basic idea of **Continuous Integration**.
+
+---
+
+# PART A — Step 1: Make sure you have the required software
+
+You need:
+
+* A GitHub account
+* Visual Studio Code
+* Git / Git Bash
+* A web browser
+* Internet connection
+
+For **Part A**, you do **not** need Jenkins yet.
+
+---
+
+# Step 2 — Create your GitHub repository
+
+Go to [GitHub](https://github.com?utm_source=chatgpt.com).
+
+Log into your account.
+
+Once you're logged in:
+
+1. Click the **+** button in the top-right corner.
+2. Select **New repository**.
+
+Fill in:
+
+### Repository name
+
+```text
+ci-demo-lab
+```
+
+### Visibility
+
+Select:
+
+```text
+Public
+```
+
+### Initialize repository
+
+Check:
+
+```text
+☑ Add a README file
+```
+
+Then click:
+
+**Create repository**
+
+---
+
+# Step 3 — Check your repository
+
+You should now have a GitHub repository called:
+
+```text
+ci-demo-lab
+```
+
+Inside it, you should see approximately:
+
+```text
+ci-demo-lab
+└── README.md
+```
+
+Don't worry if you don't understand GitHub yet.
+
+Think of a GitHub repository simply as:
+
+> **An online folder where your project files and their history are stored.**
+
+---
+
+# Step 4 — Create `index.html`
+
+Now we're going to add a simple webpage.
+
+Inside your GitHub repository, click:
+
+**Add file → Create new file**
+
+For the filename, enter:
+
+```text
+index.html
+```
+
+Paste this:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GitHub Actions CI Demo</title>
+</head>
+<body>
+    <h1>Continuous Integration Pipeline</h1>
+    <h2>Using GitHub Actions</h2>
+    <p>This project demonstrates CI using GitHub Actions.</p>
+</body>
+</html>
+```
+
+Scroll down to the commit section.
+
+For the commit message, enter:
+
+```text
+Added index.html
+```
+
+Click:
+
+**Commit changes**
+
+---
+
+# Step 5 — Check the repository
+
+Go back to the main repository page.
+
+You should now see:
+
+```text
+ci-demo-lab
+├── README.md
+└── index.html
+```
+
+Excellent.
+
+At this point:
+
+**GitHub repository ✅**
+
+**HTML file ✅**
+
+---
+
+# Step 6 — Install/verify Git
+
+Now we need Git because we'll download the repository onto your computer.
+
+Open **PowerShell** or **Git Bash**.
+
+Type:
+
+```bash
+git --version
+```
+
+Press Enter.
+
+You should get something similar to:
+
+```text
+git version 2.x.x
+```
+
+The exact version doesn't matter.
+
+### If Git isn't installed
+
+Install Git for Windows from [Git's official website](https://git-scm.com/?utm_source=chatgpt.com), then reopen your terminal and run:
+
+```bash
+git --version
+```
+
+again.
+
+---
+
+# Step 7 — Get your GitHub repository URL
+
+Go back to your GitHub repository:
+
+```text
+ci-demo-lab
+```
+
+Click:
+
+**Code**
+
+You will see a URL similar to:
+
+```text
+https://github.com/YOUR_USERNAME/ci-demo-lab.git
+```
+
+⚠️ Don't literally type `YOUR_USERNAME`.
+
+For example, if your GitHub username were `rahul123`, the URL would be:
+
+```text
+https://github.com/rahul123/ci-demo-lab.git
+```
+
+Copy **your actual URL**.
+
+---
+
+# Step 8 — Open Visual Studio Code
+
+Open VS Code.
+
+Go to:
+
+**Terminal → New Terminal**
+
+You can use Git Bash if it is available.
+
+Now decide where you want to keep the project.
+
+For example, Desktop.
+
+In Git Bash:
+
+```bash
+cd ~/Desktop
+```
+
+Then clone the repository:
+
+```bash
+git clone https://github.com/YOUR_USERNAME/ci-demo-lab.git
+```
+
+Replace the URL with your actual repository URL.
+
+For example:
+
+```bash
+git clone https://github.com/rahul123/ci-demo-lab.git
+```
+
+---
+
+# Step 9 — Enter the project folder
+
+Run:
+
+```bash
+cd ci-demo-lab
+```
+
+Then:
+
+```bash
+ls
+```
+
+You should see:
+
+```text
+README.md
+index.html
+```
+
+Now run:
+
+```bash
+code .
+```
+
+VS Code should open the project.
+
+Your project should look like:
+
+```text
+ci-demo-lab
+├── README.md
+└── index.html
+```
+
+---
+
+# Step 10 — Create the GitHub Actions folder
+
+Now we're going to create the folder where GitHub Actions workflows live.
+
+In the VS Code terminal, run:
+
+```bash
+mkdir -p .github/workflows
+```
+
+Then:
+
+```bash
+touch .github/workflows/ci.yml
+```
+
+Your project should now look like:
+
+```text
+ci-demo-lab
+├── README.md
+├── index.html
+└── .github
+    └── workflows
+        └── ci.yml
+```
+
+### What is `.github/workflows`?
+
+GitHub looks inside:
+
+```text
+.github/workflows
+```
+
+for workflow files.
+
+Our file:
+
+```text
+ci.yml
+```
+
+will tell GitHub:
+
+> "When something happens in my repository, perform these steps."
+
+---
+
+# Step 11 — Open `ci.yml`
+
+In VS Code Explorer, find:
+
+```text
+.github
+└── workflows
+    └── ci.yml
+```
+
+Click `ci.yml`.
+
+Paste this:
+
+```yaml
+name: GitHub CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Display Message
+        run: echo "Build Started"
+
+      - name: List Files
+        run: ls
+
+      - name: Build Successful
+        run: echo "Build Completed Successfully"
+```
+
+Save:
+
+**Ctrl + S**
+
+---
+
+# Step 12 — Understand the workflow
+
+This looks complicated initially, but it's actually quite simple.
+
+### Name
+
+```yaml
+name: GitHub CI Pipeline
+```
+
+This gives our workflow the name:
+
+```text
+GitHub CI Pipeline
+```
+
+You'll see this name in GitHub's **Actions** section.
+
+---
+
+### Trigger
+
+```yaml
+on:
+  push:
+    branches:
+      - main
+```
+
+This means:
+
+> Whenever code is pushed to the `main` branch, start the workflow.
+
+So:
+
+```text
+git push
+    ↓
+GitHub
+    ↓
+CI workflow starts
+```
+
+---
+
+### Job
+
+```yaml
+jobs:
+  build:
+```
+
+We're creating a job called:
+
+```text
+build
+```
+
+---
+
+### Operating system
+
+```yaml
+runs-on: ubuntu-latest
+```
+
+GitHub will provide a temporary Ubuntu computer to run our job.
+
+You don't need to install Ubuntu yourself.
+
+---
+
+### Checkout
+
+```yaml
+uses: actions/checkout@v4
+```
+
+This downloads/checks out your repository code into the GitHub Actions machine.
+
+---
+
+### Display message
+
+```yaml
+run: echo "Build Started"
+```
+
+It simply prints:
+
+```text
+Build Started
+```
+
+---
+
+### List files
+
+```yaml
+run: ls
+```
+
+This displays files in the project.
+
+You should see something like:
+
+```text
+README.md
+index.html
+```
+
+and possibly `.github`.
+
+---
+
+### Build successful
+
+```yaml
+run: echo "Build Completed Successfully"
+```
+
+This simply prints:
+
+```text
+Build Completed Successfully
+```
+
+For this experiment, our "build" is deliberately simple because we're demonstrating the CI mechanism rather than compiling a real application.
+
+---
+
+# Step 13 — Commit the workflow
+
+Now we need to send the workflow to GitHub.
+
+In Git Bash, make sure you're inside:
+
+```text
+ci-demo-lab
+```
+
+Run:
+
+```bash
+git status
+```
+
+You should see something mentioning:
+
+```text
+.github/workflows/ci.yml
+```
+
+Now run:
+
+```bash
+git add .
+```
+
+Then:
+
+```bash
+git commit -m "Added GitHub Actions workflow"
+```
+
+Then:
+
+```bash
+git push origin main
+```
+
+---
+
+# Step 14 — What just happened?
+
+You performed:
+
+```text
+Created ci.yml
+       ↓
+git add
+       ↓
+git commit
+       ↓
+git push
+       ↓
+GitHub received the workflow
+       ↓
+GitHub noticed a push to main
+       ↓
+GitHub Actions started automatically
+```
+
+🎉 This is your first CI trigger.
+
+---
+
+# Step 15 — Open GitHub Actions
+
+Go to your GitHub repository.
+
+Click:
+
+**Actions**
+
+You should see:
+
+```text
+GitHub CI Pipeline
+```
+
+Click it.
+
+You should see a workflow run.
+
+It may initially say:
+
+```text
+Queued
+```
+
+or:
+
+```text
+In progress
+```
+
+Wait a little while.
+
+Eventually it should show:
+
+```text
+✓ Success
+```
+
+---
+
+# Step 16 — Open the workflow run
+
+Click the latest workflow run.
+
+You should see a job called something like:
+
+```text
+build
+```
+
+Click it.
+
+You'll see steps such as:
+
+```text
+✓ Checkout Repository
+✓ Display Message
+✓ List Files
+✓ Build Successful
+```
+
+This is the result your experiment is asking you to demonstrate.
+
+---
+
+# Step 17 — View the console output
+
+Click:
+
+**Display Message**
+
+You should see:
+
+```text
+Build Started
+```
+
+Click:
+
+**List Files**
+
+You should see something similar to:
+
+```text
+README.md
+index.html
+.github
+```
+
+Finally, you should see:
+
+```text
+Build Completed Successfully
+```
+
+At the bottom, you should see something indicating:
+
+```text
+Process completed with exit code 0.
+```
+
+### What does exit code 0 mean?
+
+Simply:
+
+```text
+0 = Successful
+```
+
+So:
+
+```text
+exit code 0
+     ↓
+No error
+     ↓
+CI succeeded ✅
+```
+
+---
+
+# Step 18 — Verify the repository structure
+
+Go back to the **Code** tab.
+
+You should now have:
+
+```text
+ci-demo-lab
+├── README.md
+├── index.html
+└── .github
+    └── workflows
+        └── ci.yml
+```
+
+If you see this, Part A is basically complete.
+
+---
+
+# Step 19 — Test the CI pipeline properly
+
+Now we're going to prove that CI automatically runs when the code changes.
+
+Open:
+
+```text
+index.html
+```
+
+Find:
+
+```html
+<h2>Using GitHub Actions</h2>
+```
+
+Change it to:
+
+```html
+<h2>Using GitHub Actions - Version 2</h2>
+```
+
+Save the file.
+
+---
+
+# Step 20 — Push the modification
+
+In Git Bash:
+
+```bash
+git add .
+```
+
+Then:
+
+```bash
+git commit -m "Updated index.html"
+```
+
+Then:
+
+```bash
+git push origin main
+```
+
+---
+
+# Step 21 — Watch GitHub Actions start again
+
+Go to:
+
+**GitHub → Your repository → Actions**
+
+You should see a **new workflow run**.
+
+Why?
+
+Because our workflow says:
+
+```yaml
+on:
+  push:
+    branches:
+      - main
+```
+
+You pushed to `main`.
+
+Therefore:
+
+```text
+Modified index.html
+       ↓
+git commit
+       ↓
+git push
+       ↓
+GitHub detects push
+       ↓
+GitHub Actions starts
+       ↓
+CI runs
+       ↓
+SUCCESS ✅
+```
+
+### 🎉 Part A is complete.
+
+You have demonstrated:
+
+* GitHub repository
+* GitHub Actions
+* Workflow
+* Automatic trigger
+* Build job
+* Console output
+* Successful CI execution
+* CI executing again after a code change
+
+---
+
+# PART B — Jenkins CI Pipeline
+
+Now we move to Jenkins.
+
+This is a **separate CI system**.
+
+The idea is similar:
+
+```text
+Developer
+    ↓
+GitHub
+    ↓
+Jenkins
+    ↓
+Build
+    ↓
+Test
+    ↓
+Result
+```
+
+For this part, we need:
+
+* Java
+* Jenkins
+* Git
+* GitHub
+* VS Code
+
+---
+
+# Step 22 — Install Java
+
+Jenkins runs on Java, so Java must be installed first.
+
+Open PowerShell and type:
+
+```bash
+java -version
+```
+
+If Java is installed, you'll see something similar to:
+
+```text
+java version "17..."
+```
+
+or another supported version.
+
+If you get:
+
+```text
+'java' is not recognized...
+```
+
+you need to install a supported JDK.
+
+You can use [OpenJDK](https://openjdk.org/?utm_source=chatgpt.com) or [Oracle Java](https://www.oracle.com/java/technologies/downloads/?utm_source=chatgpt.com).
+
+After installation, close and reopen PowerShell and run:
+
+```bash
+java -version
+```
+
+again.
+
+---
+
+# Step 23 — Install Jenkins
+
+Download Jenkins LTS from [Jenkins official download page](https://www.jenkins.io/download/?utm_source=chatgpt.com).
+
+Choose the Windows installer.
+
+Install it using the normal installation options.
+
+During installation, Jenkins will normally be configured as a Windows service.
+
+The default Jenkins address is:
+
+```text
+http://localhost:8080
+```
+
+---
+
+# Step 24 — Open Jenkins
+
+After installation, open your browser and go to:
+
+```text
+http://localhost:8080
+```
+
+You should see a Jenkins setup/unlock screen.
+
+It will ask for an **Administrator password**.
+
+---
+
+# Step 25 — Get the Jenkins initial password
+
+Open File Explorer.
+
+Go to:
+
+```text
+C:\Program Files\Jenkins\secrets\
+```
+
+Find:
+
+```text
+initialAdminPassword
+```
+
+Open the file.
+
+You'll see a long string of characters.
+
+Copy it.
+
+Go back to Jenkins in your browser.
+
+Paste the password.
+
+Click:
+
+**Continue**
+
+---
+
+# Step 26 — Install Jenkins plugins
+
+Jenkins should give you choices such as:
+
+```text
+Install suggested plugins
+```
+
+Choose:
+
+**Install Suggested Plugins**
+
+Wait for installation to finish.
+
+This can take several minutes.
+
+Don't close the browser while it's installing.
+
+---
+
+# Step 27 — Create the Jenkins administrator account
+
+You'll get a screen asking for user information.
+
+For a lab, you can use something like:
+
+```text
+Username: admin
+Password: admin123
+Full Name: Administrator
+Email: admin@gmail.com
+```
+
+⚠️ For a real Jenkins installation, don't use `admin123`; use a strong password. Your lab sheet uses these values simply for demonstration.
+
+Click:
+
+**Save and Continue**
+
+Then complete the remaining setup screens.
+
+Eventually you'll reach the Jenkins dashboard.
+
+---
+
+# Step 28 — Understand Jenkins
+
+You should now see:
+
+```text
+Jenkins Dashboard
+```
+
+Think of Jenkins as:
+
+> A program running on your computer that can automatically perform software-development tasks.
+
+For example:
+
+```text
+GitHub
+  ↓
+Jenkins
+  ↓
+Download code
+  ↓
+Build
+  ↓
+Test
+  ↓
+Deploy
+```
+
+---
+
+# Step 29 — Create the Jenkins GitHub repository
+
+Now create a **new GitHub repository**.
+
+Go to GitHub.
+
+Create:
+
+```text
+jenkins-ci-demo
+```
+
+Set it to:
+
+```text
+Public
+```
+
+Check:
+
+```text
+Add a README file
+```
+
+Create the repository.
+
+---
+
+# Step 30 — Add `index.html`
+
+Inside `jenkins-ci-demo`, create:
+
+```text
+index.html
+```
+
+Paste:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Jenkins CI Demo</title>
+</head>
+<body>
+    <h1>Welcome to Jenkins CI Pipeline</h1>
+    <p>This project demonstrates a Continuous Integration (CI) Pipeline using Jenkins.</p>
+
+    <h2>Student Details</h2>
+    <ul>
+        <li>Name: Your Name</li>
+        <li>Roll No.: Your Roll Number</li>
+        <li>Course: B.E. AIML</li>
+    </ul>
+</body>
+</html>
+```
+
+Replace:
+
+```text
+Your Name
+Your Roll Number
+```
+
+with your actual details.
+
+Commit the file.
+
+Your repository should now contain:
+
+```text
+jenkins-ci-demo
+├── README.md
+└── index.html
+```
+
+---
+
+# Step 31 — Create a Jenkins Freestyle project
+
+Go back to Jenkins.
+
+From the dashboard click:
+
+**New Item**
+
+Enter:
+
+```text
+CI-Pipeline
+```
+
+Select:
+
+```text
+Freestyle project
+```
+
+Click:
+
+**OK**
+
+---
+
+# Step 32 — Configure the GitHub repository
+
+You'll now see the configuration page.
+
+Find:
+
+**Source Code Management**
+
+Select:
+
+```text
+Git
+```
+
+You'll see:
+
+```text
+Repository URL
+```
+
+Paste your repository URL.
+
+It should look like:
+
+```text
+https://github.com/YOUR_USERNAME/jenkins-ci-demo.git
+```
+
+Use your actual username.
+
+For the branch, enter:
+
+```text
+*/main
+```
+
+### Public repository
+
+Because we created the repository as public, Jenkins may be able to clone it without credentials.
+
+If Jenkins asks for credentials and can't connect, stop there and show me the error—you don't need to guess.
+
+---
+
+# Step 33 — Configure the build trigger
+
+Scroll to:
+
+**Build Triggers**
+
+For the simplest local lab setup, select:
+
+```text
+Poll SCM
+```
+
+You'll get a schedule box.
+
+Enter:
+
+```text
+H/2 * * * *
+```
+
+This means Jenkins checks periodically for changes.
+
+In simple terms:
+
+```text
+Jenkins
+   ↓
+Checks GitHub
+   ↓
+"Any new commit?"
+   ↓
+Yes → Build
+```
+
+For a local Jenkins installation, this is easier than setting up a public GitHub webhook.
+
+---
+
+# Step 34 — Configure the build step
+
+Find:
+
+**Build Steps**
+
+Click:
+
+**Add build step**
+
+Choose:
+
+```text
+Execute Windows batch command
+```
+
+Enter:
+
+```bat
+echo Build Started
+dir
+echo Build Completed Successfully
+```
+
+Save the configuration.
+
+---
+
+# Step 35 — Run the Jenkins build
+
+Open your Jenkins project:
+
+```text
+CI-Pipeline
+```
+
+Click:
+
+**Build Now**
+
+You should see a new build appear in:
+
+**Build History**
+
+For example:
+
+```text
+#1
+```
+
+If successful, you'll eventually see a green success indicator.
+
+---
+
+# Step 36 — View Jenkins console output
+
+Click:
+
+```text
+#1
+```
+
+Then:
+
+**Console Output**
+
+You should see output similar to:
+
+```text
+Started by user admin
+...
+Build Started
+...
+Build Completed Successfully
+...
+Finished: SUCCESS
+```
+
+You may also see the files from the repository.
+
+The exact output won't necessarily be identical to your lab manual.
+
+The important part is:
+
+```text
+Finished: SUCCESS
+```
+
+🎉 Your first Jenkins CI job has worked.
+
+---
+
+# Step 37 — Modify the Jenkins project
+
+Now we test automatic CI.
+
+Open the local `jenkins-ci-demo` repository in VS Code.
+
+Modify `index.html`.
+
+For example, change:
+
+```html
+<h1>Welcome to Jenkins CI Pipeline</h1>
+```
+
+to:
+
+```html
+<h1>Welcome to Jenkins CI Pipeline - Version 2</h1>
+```
+
+Save it.
+
+---
+
+# Step 38 — Push the change to GitHub
+
+In Git Bash:
+
+```bash
+git add .
+```
+
+Then:
+
+```bash
+git commit -m "Updated HTML Page"
+```
+
+Then:
+
+```bash
+git push origin main
+```
+
+---
+
+# Step 39 — Let Jenkins detect the change
+
+Because we configured:
+
+```text
+Poll SCM
+H/2 * * * *
+```
+
+Jenkins periodically checks GitHub.
+
+After detecting your new commit, it should create another build.
+
+You may eventually see:
+
+```text
+Build History
+
+#2
+#1
+```
+
+with successful builds.
+
+The important idea is:
+
+```text
+Change code
+     ↓
+Commit
+     ↓
+Push to GitHub
+     ↓
+Jenkins detects change
+     ↓
+New build
+     ↓
+SUCCESS
+```
+
+---
+
+# PART B — Jenkins Pipeline Project
+
+Now we're going to do the final portion of your experiment.
+
+This is slightly different from the Freestyle project.
+
+Instead of configuring individual build steps through the Jenkins interface, we write a **Pipeline script**.
+
+---
+
+# Step 40 — Create a Pipeline project
+
+Go to Jenkins Dashboard.
+
+Click:
+
+**New Item**
+
+Enter:
+
+```text
+Pipeline-Demo
+```
+
+Select:
+
+```text
+Pipeline
+```
+
+Click:
+
+**OK**
+
+---
+
+# Step 41 — Find Pipeline configuration
+
+Scroll down to the bottom of the configuration page.
+
+Find:
+
+```text
+Pipeline
+```
+
+Under:
+
+```text
+Definition
+```
+
+choose:
+
+```text
+Pipeline script
+```
+
+You'll see a large text box.
+
+---
+
+# Step 42 — Enter the Pipeline script
+
+Paste this:
+
+```groovy
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Checking out source code...'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                bat 'echo Building Project...'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                bat 'echo Running Tests...'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                bat 'echo Deployment Successful'
+            }
+        }
+    }
+}
+```
+
+Save the project.
+
+---
+
+# Step 43 — Understand this Pipeline
+
+This is called a **Jenkinsfile-style Declarative Pipeline script**.
+
+It has four stages:
+
+```text
+Checkout
+   ↓
+Build
+   ↓
+Test
+   ↓
+Deploy
+```
+
+### Checkout
+
+```groovy
+stage('Checkout')
+```
+
+This represents obtaining source code.
+
+In our simple lab script, it only prints:
+
+```text
+Checking out source code...
+```
+
+It does not actually clone GitHub because the experiment's pipeline script is demonstrating stages.
+
+---
+
+### Build
+
+```groovy
+stage('Build')
+```
+
+It runs:
+
+```text
+Building Project...
+```
+
+---
+
+### Test
+
+```groovy
+stage('Test')
+```
+
+It runs:
+
+```text
+Running Tests...
+```
+
+---
+
+### Deploy
+
+```groovy
+stage('Deploy')
+```
+
+It runs:
+
+```text
+Deployment Successful
+```
+
+So the conceptual pipeline is:
+
+```text
+┌──────────┐
+│ Checkout │
+└────┬─────┘
+     ↓
+┌──────────┐
+│  Build   │
+└────┬─────┘
+     ↓
+┌──────────┐
+│   Test   │
+└────┬─────┘
+     ↓
+┌──────────┐
+│  Deploy  │
+└──────────┘
+```
+
+---
+
+# Step 44 — Run the Pipeline
+
+Open:
+
+```text
+Pipeline-Demo
+```
+
+Click:
+
+**Build Now**
+
+A build should appear in Build History.
+
+Wait for it to finish.
+
+You want:
+
+```text
+SUCCESS
+```
+
+---
+
+# Step 45 — Open Stage View
+
+Open the build.
+
+You should see the stages:
+
+```text
+Checkout
+Build
+Test
+Deploy
+```
+
+Ideally, each stage should be green/successful.
+
+Your final pipeline should look conceptually like:
+
+```text
+Checkout  →  Build  →  Test  →  Deploy
+   ✅          ✅        ✅        ✅
+```
+
+---
+
+# Step 46 — View Console Output
+
+Open:
+
+**Console Output**
+
+You should see something similar to:
+
+```text
+Started by user admin
+
+Checking out source code...
+
+Building Project...
+
+Running Tests...
+
+Deployment Successful
+
+Finished: SUCCESS
+```
+
+The exact Jenkins output can contain additional lines. That's normal.
+
+The important output is:
+
+```text
+Checking out source code...
+Building Project...
+Running Tests...
+Deployment Successful
+Finished: SUCCESS
+```
+
+---
+
+# 🎉 Your complete experiment is now finished
+
+You have demonstrated **both CI systems**.
+
+## Part A — GitHub Actions
+
+You achieved:
+
+```text
+GitHub Repository
+       ↓
+index.html
+       ↓
+ci.yml
+       ↓
+GitHub Actions
+       ↓
+Checkout
+       ↓
+Build Started
+       ↓
+List Files
+       ↓
+Build Completed
+       ↓
+SUCCESS ✅
+```
+
+Then you modified the code:
+
+```text
+Modify index.html
+       ↓
+git commit
+       ↓
+git push
+       ↓
+GitHub Actions automatically runs again
+       ↓
+SUCCESS ✅
+```
+
+---
+
+## Part B — Jenkins
+
+You achieved:
+
+```text
+GitHub Repository
+       ↓
+Jenkins
+       ↓
+Freestyle Project
+       ↓
+Build
+       ↓
+Console Output
+       ↓
+SUCCESS ✅
+```
+
+Then:
+
+```text
+Modify index.html
+       ↓
+git commit
+       ↓
+git push
+       ↓
+Jenkins detects change
+       ↓
+New Build
+       ↓
+SUCCESS ✅
+```
+
+Finally:
+
+```text
+Jenkins Pipeline
+       ↓
+Checkout
+       ↓
+Build
+       ↓
+Test
+       ↓
+Deploy
+       ↓
+SUCCESS ✅
+```
+
+---
+
+# What you should be able to show your teacher
+
+If this is a practical exam, make sure you can demonstrate these screens.
+
+### GitHub Actions
+
+**1. Repository**
+
+```text
+ci-demo-lab
+├── README.md
+├── index.html
+└── .github
+    └── workflows
+        └── ci.yml
+```
+
+**2. Actions tab**
+
+Show:
+
+```text
+GitHub CI Pipeline
+✓ Success
+```
+
+**3. Workflow details**
+
+Show:
+
+```text
+Checkout Repository ✓
+Display Message ✓
+List Files ✓
+Build Successful ✓
+```
+
+**4. Console output**
+
+Show:
+
+```text
+Build Started
+README.md
+index.html
+.github
+Build Completed Successfully
+Process completed with exit code 0.
+```
+
+---
+
+### Jenkins
+
+**1. Jenkins Dashboard**
+
+Show:
+
+```text
+CI-Pipeline
+Pipeline-Demo
+```
+
+**2. Freestyle build**
+
+Show:
+
+```text
+#1 SUCCESS
+#2 SUCCESS
+```
+
+if you've completed the modification test.
+
+**3. Console Output**
+
+Show:
+
+```text
+Build Started
+Build Completed Successfully
+Finished: SUCCESS
+```
+
+**4. Pipeline Stage View**
+
+Show:
+
+```text
+Checkout ✓
+Build ✓
+Test ✓
+Deploy ✓
+```
+
+**5. Pipeline Console**
+
+Show:
+
+```text
+Checking out source code...
+Building Project...
+Running Tests...
+Deployment Successful
+Finished: SUCCESS
+```
+
+---
+
+# Important viva questions to learn
+
+### 1. What is CI?
+
+**Continuous Integration** is the practice of automatically building and testing code whenever developers integrate changes into a shared repository.
+
+### 2. What is Jenkins?
+
+Jenkins is an open-source automation server used to automate software development tasks such as building, testing, and deployment.
+
+### 3. What is GitHub Actions?
+
+GitHub Actions is GitHub's built-in automation platform for running workflows in response to repository events such as pushes.
+
+### 4. What is a workflow?
+
+A workflow is a YAML file containing instructions that GitHub Actions executes automatically.
+
+In our experiment:
+
+```text
+.github/workflows/ci.yml
+```
+
+is the workflow file.
+
+### 5. What triggers our GitHub Actions workflow?
+
+This:
+
+```yaml
+on:
+  push:
+    branches:
+      - main
+```
+
+means a push to the `main` branch triggers the workflow.
+
+### 6. What is `runs-on: ubuntu-latest`?
+
+It tells GitHub Actions to execute the job on a GitHub-hosted Ubuntu runner.
+
+### 7. What is a Jenkins Freestyle project?
+
+It is a Jenkins job where configuration such as source control and build steps is primarily configured through the Jenkins web interface.
+
+### 8. What is a Jenkins Pipeline?
+
+A Jenkins Pipeline defines the CI/CD process as code, using stages such as:
+
+```text
+Checkout → Build → Test → Deploy
+```
+
+### 9. What does `Finished: SUCCESS` mean?
+
+It means the Jenkins build completed successfully without an error.
+
+### 10. What is the main advantage of CI?
+
+CI reduces manual work and gives developers fast feedback when code changes introduce problems.
+
+---
+
+## One important correction to your lab manual
+
+There is a subtle difference between the **conceptual objective** and the exact Jenkins Pipeline script your manual gives you.
+
+The Pipeline script:
+
+```groovy
+stage('Checkout') {
+    steps {
+        echo 'Checking out source code...'
+    }
+}
+```
+
+**doesn't actually check out GitHub code**. It only prints a message saying that checkout is happening.
+
+Likewise:
+
+```groovy
+bat 'echo Running Tests...'
+```
+
+doesn't actually run tests—it only prints the message.
+
+That's **fine for this particular introductory experiment** because the goal is to demonstrate Jenkins Pipeline stages. Just don't claim in your viva that this particular script actually downloaded, built, tested, and deployed a real application. It demonstrates those **pipeline stages**.
+
+---
+
+## Your practical sequence — memorize this
+
+If you forget everything else, remember:
+
+```text
+PART A — GITHUB ACTIONS
+
+Create GitHub repo
+       ↓
+Create index.html
+       ↓
+Clone repository
+       ↓
+Create .github/workflows/ci.yml
+       ↓
+Write YAML workflow
+       ↓
+git add .
+       ↓
+git commit
+       ↓
+git push
+       ↓
+GitHub → Actions
+       ↓
+Check SUCCESS
+       ↓
+Modify index.html
+       ↓
+git add / commit / push
+       ↓
+Check new automatic workflow
+```
+
+Then:
+
+```text
+PART B — JENKINS
+
+Install Java
+       ↓
+Install Jenkins
+       ↓
+localhost:8080
+       ↓
+Unlock Jenkins
+       ↓
+Install suggested plugins
+       ↓
+Create admin
+       ↓
+Create GitHub repository
+       ↓
+Create Freestyle project
+       ↓
+Connect GitHub
+       ↓
+Configure build
+       ↓
+Build Now
+       ↓
+Console Output
+       ↓
+SUCCESS
+       ↓
+Modify + push code
+       ↓
+Jenkins detects change
+       ↓
+New build
+       ↓
+SUCCESS
+       ↓
+Create Pipeline project
+       ↓
+Add Pipeline script
+       ↓
+Build Now
+       ↓
+Checkout → Build → Test → Deploy
+       ↓
+SUCCESS
+```
+
+**Start only with Part A, Step 1.** First verify Git on your computer by running:
+
+```bash
+git --version
+```
+
+If it works, the next thing is creating `ci-demo-lab`. If it doesn't work, fix Git first rather than moving ahead.
